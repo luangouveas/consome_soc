@@ -1,0 +1,38 @@
+{
+  "name": "consome_pedido_soc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "tsx watch --env-file .env src/index.ts",
+    "start": "node --env-file .env -r ./dist/index.js",
+    "cli:dev": "tsx watch --env-file .env src/main/cli.ts",
+    "cli": "node --env-file .env -r ./dist/main/cli.js",
+    "build": "tsup src",
+    "test": "jest"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@eslint/js": "^9.8.0",
+    "@types/jest": "^29.5.12",
+    "@types/node": "^22.1.0",
+    "eslint": "^9.8.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.9.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.3.3",
+    "ts-jest": "^29.2.4",
+    "ts-node": "^10.9.2",
+    "tsup": "^8.2.4",
+    "tsx": "^4.17.0",
+    "typescript": "^5.5.4",
+    "typescript-eslint": "^8.0.1"
+  },
+  "dependencies": {
+    "knex": "^3.1.0",
+    "soap": "^1.1.1",
+    "tedious": "^18.3.0"
+  }
+}
