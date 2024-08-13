@@ -1,11 +1,14 @@
 import { CriarSoapClientType } from '../../soap'
+import { pipe } from 'fp-ts/function'
+import * as TE from 'fp-ts/TaskEither'
+import * as E from 'fp-ts/Either'
 
 type Deps = {
   criarSoapClient: CriarSoapClientType
   parametros: object
 }
 
-export const consumirExportaDados = async ({ criarSoapClient, parametros }: Deps) => {
+export const consumirExportaDados = ({ criarSoapClient, parametros }: Deps) => {
   const wsdl = process.env.WSDL_SOC_EXPORTADADOS as string
   const soapClient = criarSoapClient()
 
@@ -20,6 +23,11 @@ export const consumirExportaDados = async ({ criarSoapClient, parametros }: Deps
         </soapenv:Body>
     </soapenv:Envelope>`
 
-  const resultadoED = await soapClient.executarSoap(wsdl, 'exportaDadosWs', xml)
-  return JSON.parse(resultadoED.return.retorno)
+  return pipe(
+    TE.tryCatch(() => soapClient.executarSoap(wsdl, 'exportaDadosWs', xml), E.toError),
+    TE.map((res) => {
+      //console.log(JSON.parse(res.return.retorno))
+      return JSON.parse(res.return.retorno)
+    }),
+  )
 }

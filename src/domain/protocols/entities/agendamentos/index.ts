@@ -1,5 +1,9 @@
 export type AgendamentoPendente = {
+  dscApelido: string
+  dscNome: string
+  codSequencialFichaSOC: number
   codAgendamentoCredenciadoBase: number
+  codEmpresaSoc: number
 }
 
 // 1 OK || 2 ERROR

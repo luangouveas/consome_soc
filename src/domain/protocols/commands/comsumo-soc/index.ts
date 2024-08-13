@@ -1,4 +1,4 @@
-import { AgendamentoProcessados } from '@/domain/entities/agendamentos'
+import { AgendamentoProcessados } from '@/domain/protocols/entities/agendamentos'
 import { AgendamentosRepository } from '../../repositories/agendamentos-repository'
 
 type Deps = {

@@ -31,6 +31,7 @@
     "typescript-eslint": "^8.0.1"
   },
   "dependencies": {
+    "fp-ts": "^2.16.9",
     "knex": "^3.1.0",
     "soap": "^1.1.1",
     "tedious": "^18.3.0"
