@@ -4,11 +4,7 @@ import { consumirExportaDados } from '@/infra/gateway/soc/servicos/exportadados'
 import { criarSoapClient } from '@/infra/gateway/soap'
 import { PedidoExameSequencialFicha } from '@/infra/gateway/soc/servicos/protocols'
 
-import { pipe } from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
-import { traverseWithIndex } from 'fp-ts/ReadonlyArray'
-import { sequenceT } from 'fp-ts/lib/Apply'
+import { tryCatch, chain, pipe, map, mapLeft, toError, sequenceArray, right } from '@/utils/Either'
 
 type Deps = {
   repository: AgendamentosRepository
@@ -21,11 +17,8 @@ type Options = {
 
 const { CODIGO_EMPRESA_PRINCIPAL, CODIGO_PEDIDOS_EXAME_SEQUENCIAL_FICHA, CHAVE_PEDIDOS_EXAME_SEQUENCIAL_FICHA } = process.env
 
-const atualizaRegistro = (exames: PedidoExameSequencialFicha[]) => {
-  if (exames) {
-    return true
-  }
-  return false
+const atualizaRegistro = async (exames: PedidoExameSequencialFicha[]) => {
+  console.log()
 }
 
 const consultaAtualizaResultadoFichaSoc = (agendamento: AgendamentoPendente) => {
@@ -39,20 +32,26 @@ const consultaAtualizaResultadoFichaSoc = (agendamento: AgendamentoPendente) => 
   }
 
   return pipe(
-    { criarSoapClient, parametros },
-    consumirExportaDados,
-    TE.chain((exames: PedidoExameSequencialFicha[]) => {
-      return pipe(
-        TE.tryCatch(async () => atualizaRegistro(exames), E.toError),
-        TE.map((res) => (res ? [agendamento] : [])),
-      )
+    consumirExportaDados({ criarSoapClient, parametros }),
+    map((exames: PedidoExameSequencialFicha[]) => {
+      if (exames.length > 0) {
+        return pipe(
+          tryCatch(() => atualizaRegistro(exames), toError),
+          map((res) => {
+            console.log(res)
+            return agendamento
+          }),
+        )
+      }
+      return right(null)
     }),
+    mapLeft((err) => console.log(err.message)),
   )
 }
 
 const consulteResultadoNoSoc = (agendamentos: AgendamentoPendente[]) => {
-  const consultas = agendamentos.map(consultaAtualizaResultadoFichaSoc)
-  return TE.sequenceArray(consultas)
+  const agendamentosConsultados = agendamentos.map(consultaAtualizaResultadoFichaSoc)
+  return sequenceArray(agendamentosConsultados)
 }
 
 export const ConsumirDatasDeRealizacaoDosExames = ({ repository }: Deps) => {
@@ -64,11 +63,11 @@ export const ConsumirDatasDeRealizacaoDosExames = ({ repository }: Deps) => {
     return pipe(
       agendamentosPendentes,
       consulteResultadoNoSoc,
-      TE.map((listaDeAgendamentosAtualizados) => {
-        const flattenLista = listaDeAgendamentosAtualizados.flat()
-        console.log(flattenLista) //tem que retornar o array so com 1 agendamento, pois os outros 2 nao existem no soc, portanto nao serao processados no evida
+      map((listaDeAgendamentosAtualizados) => {
+        const flattenLista = listaDeAgendamentosAtualizados.flat().filter((ag) => ag)
         return flattenLista
       }),
+      mapLeft(() => console.log('teve erro')),
     )()
   }
 }

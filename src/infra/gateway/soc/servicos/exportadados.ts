@@ -1,7 +1,5 @@
 import { CriarSoapClientType } from '../../soap'
-import { pipe } from 'fp-ts/function'
-import * as TE from 'fp-ts/TaskEither'
-import * as E from 'fp-ts/Either'
+import { pipe, tryCatch, map, toError, mapLeft, left, right, chain } from '@/utils/Either'
 
 type Deps = {
   criarSoapClient: CriarSoapClientType
@@ -24,10 +22,12 @@ export const consumirExportaDados = ({ criarSoapClient, parametros }: Deps) => {
     </soapenv:Envelope>`
 
   return pipe(
-    TE.tryCatch(() => soapClient.executarSoap(wsdl, 'exportaDadosWs', xml), E.toError),
-    TE.map((res) => {
-      //console.log(JSON.parse(res.return.retorno))
-      return JSON.parse(res.return.retorno)
+    tryCatch(() => soapClient.executarSoap(wsdl, 'exportaDadosWs', xml), toError),
+    chain((res) => {
+      if (res.return.erro) {
+        return left(new Error(res.return.mensagemErro))
+      }
+      return right(JSON.parse(res.return.retorno))
     }),
   )
 }
