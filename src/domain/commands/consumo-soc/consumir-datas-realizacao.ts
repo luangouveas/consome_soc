@@ -4,7 +4,7 @@ import { consumirExportaDados } from '@/infra/gateway/soc/servicos/exportadados'
 import { criarSoapClient } from '@/infra/gateway/soap'
 import { PedidoExameSequencialFicha } from '@/infra/gateway/soc/servicos/protocols'
 
-import { tryCatch, chain, pipe, map, mapLeft, toError, sequenceArray, right } from '@/utils/Either'
+import { chain, pipe, map, mapLeft, sequenceArray, right } from '@/utils/Either'
 
 type Deps = {
   repository: AgendamentosRepository
@@ -17,8 +17,8 @@ type Options = {
 
 const { CODIGO_EMPRESA_PRINCIPAL, CODIGO_PEDIDOS_EXAME_SEQUENCIAL_FICHA, CHAVE_PEDIDOS_EXAME_SEQUENCIAL_FICHA } = process.env
 
-const atualizaRegistro = async (exames: PedidoExameSequencialFicha[]) => {
-  console.log()
+const atualizar = (exame: PedidoExameSequencialFicha) => {
+  return exame
 }
 
 const consultaAtualizaResultadoFichaSoc = (agendamento: AgendamentoPendente) => {
@@ -31,21 +31,32 @@ const consultaAtualizaResultadoFichaSoc = (agendamento: AgendamentoPendente) => 
     empresaTrabalho: agendamento.codEmpresaSoc,
   }
 
+  let agendamentoProcessado: AgendamentoProcessados = {
+    codAgendamentoCredenciadoBase: agendamento.codAgendamentoCredenciadoBase,
+    status: 1,
+    errors: [],
+  }
+
   return pipe(
     consumirExportaDados({ criarSoapClient, parametros }),
-    map((exames: PedidoExameSequencialFicha[]) => {
-      if (exames.length > 0) {
-        return pipe(
-          tryCatch(() => atualizaRegistro(exames), toError),
-          map((res) => {
-            console.log(res)
-            return agendamento
-          }),
+    chain((exames: PedidoExameSequencialFicha[]) => {
+      if (exames instanceof Error) {
+        agendamentoProcessado.status = 2
+        agendamentoProcessado.errors?.push(
+          `Erro ao consumir datas de realização do agendamento ${agendamento.codAgendamentoCredenciadoBase}: ${exames.message}`,
         )
+        return right(agendamentoProcessado)
       }
-      return right(null)
+
+      if (exames.length > 0) {
+        const examesAtualizados = exames.map(atualizar)
+      } else {
+        agendamentoProcessado.status = 2
+        agendamentoProcessado.errors?.push(`Agendamento ${agendamento.codAgendamentoCredenciadoBase} sem exames com resultado no SOC`)
+      }
+
+      return right(agendamentoProcessado)
     }),
-    mapLeft((err) => console.log(err.message)),
   )
 }
 
@@ -67,7 +78,7 @@ export const ConsumirDatasDeRealizacaoDosExames = ({ repository }: Deps) => {
         const flattenLista = listaDeAgendamentosAtualizados.flat().filter((ag) => ag)
         return flattenLista
       }),
-      mapLeft(() => console.log('teve erro')),
+      mapLeft((err) => console.log(err.message)),
     )()
   }
 }
