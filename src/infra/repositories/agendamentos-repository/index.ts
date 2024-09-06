@@ -1,3 +1,4 @@
+import { now } from 'fp-ts/lib/Date'
 import { AgendamentosRepository } from '../protocols'
 import { Knex } from 'knex'
 
@@ -44,10 +45,13 @@ export const criarAgendamentosRepository = ({ db }: Deps): AgendamentosRepositor
 
     async atualizarDataRealizacaoExamePorCodigoSequencialResultado(ResultadoExameSoc) {
       const query = `UPDATE acs 
-      SET acs.datRealizacao = '${ResultadoExameSoc.DATARESULTADO}'
+      SET acs.datRealizacao = '${ResultadoExameSoc.DATARESULTADO}',
+      acs.codUsuarioPreenchimentoRealizacao = 21862,
+      acs.datPreenchimentoRealizacao = ${db.fn.now()}
       FROM agendamentoCredenciadoServico acs 
       WHERE acs.codSequencialResultadoSoc = '${ResultadoExameSoc.SEQUENCIALRESULTADO}'`
-      await db.raw(query)
+      console.log(query)
+      await db.raw('select 1')
     },
   }
 }

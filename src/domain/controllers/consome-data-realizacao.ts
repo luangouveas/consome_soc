@@ -11,7 +11,7 @@ let examesParaAtualizar: ExamesPedidoExame[] = []
 
 const inserirExamesNaFila = (pedido: PedidoExameSequencialFicha) => {
   if (pedido.length > 0) {
-    pedido.forEach((exame) => (exame.DATARESULTADO === '' ? examesParaAtualizar.push(exame) : ''))
+    pedido.forEach((exame) => (exame.DATARESULTADO !== '' ? examesParaAtualizar.push(exame) : ''))
   }
   return true
 }
@@ -39,9 +39,7 @@ const consultaPorAgendamento = (agendamentos: AgendamentoPendente[]) => {
       return pipe(
         agendamentoPendente,
         consumirPedidoExameSoc,
-        map((pedido) => {
-          inserirExamesNaFila(pedido)
-        }),
+        map((pedido) => inserirExamesNaFila(pedido)),
         mapLeft(
           (error) => new Error(`Erro ao consumir o resultado do agendamento: ${agendamentoPendente.codAgendamentoCredenciadoBase}: ${error.message}`),
         ),
@@ -65,6 +63,7 @@ const atualizarListaDeExamesPendentes = (examesParaAtualizar: ExamesPedidoExame[
 
 export const consumirDataDeRealizacao = (agendamentos: AgendamentoPendente[]) => {
   console.log(`Agendamentos em aberto: ${agendamentos.length}`)
+  console.log(agendamentos)
   return pipe(
     agendamentos,
     consultaPorAgendamento,
