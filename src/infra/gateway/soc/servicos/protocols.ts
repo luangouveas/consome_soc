@@ -1,4 +1,4 @@
-export type PedidoExameSequencialFicha = {
+export type ExamesPedidoExame = {
   CODIGOEMPRESA: string
   CODIGOFUNCIONARIO: string
   DATAFICHA: string
@@ -13,3 +13,5 @@ export type PedidoExameSequencialFicha = {
   SEQUENCIALRESULTADO: string
   DATARESULTADO: string
 }
+
+export type PedidoExameSequencialFicha = ExamesPedidoExame[]

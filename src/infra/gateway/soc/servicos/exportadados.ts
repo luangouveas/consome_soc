@@ -23,7 +23,7 @@ export const consumirExportaDados = ({ criarSoapClient, parametros }: Deps) => {
 
   return pipe(
     tryCatch(() => soapClient.executarSoap(wsdl, 'exportaDadosWs', xml), toError),
-    chain((res) => {
+    chain((res: { return: { erro: any; mensagemErro: string | undefined; retorno: string } }) => {
       if (res.return.erro) {
         return left(new Error(res.return.mensagemErro))
       }

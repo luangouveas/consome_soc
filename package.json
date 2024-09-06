@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch --env-file .env src/index.ts",
+    "dev:jobs": "tsx watch --env-file .env src/main/jobs.ts",
     "start": "node --env-file .env -r ./dist/index.js",
     "cli:dev": "tsx watch --env-file .env src/main/cli.ts",
     "cli": "node --env-file .env -r ./dist/main/cli.js",
