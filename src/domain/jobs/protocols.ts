@@ -5,5 +5,5 @@ export type Job = {
   name: string
   frequence: string
   active: boolean
-  handle: (app: AppType) => Promise<Either<void, void>>
+  handle: (app: AppType) => Promise<void>
 }

@@ -1,5 +1,4 @@
-import { now } from 'fp-ts/lib/Date'
-import { AgendamentosRepository } from '../protocols'
+import { AgendamentosRepository } from './protocols'
 import { Knex } from 'knex'
 
 interface Deps {
@@ -22,7 +21,7 @@ export const criarAgendamentosRepository = ({ db }: Deps): AgendamentosRepositor
         WHERE 1 = 1
         AND pe.flgUsarIntegracaoPedidoExameSoc = 1
         AND acb.dataFichaSOC >= '01/01/2024' 
-        AND acb.codSequencialFichaSOC > 0`
+        AND acb.codSequencialFichaSOC IN (279463963,279464701)`
 
         if (codEmpresa) query = query + `AND em.codEmpresa IN (${codEmpresa})`
 
@@ -43,15 +42,30 @@ export const criarAgendamentosRepository = ({ db }: Deps): AgendamentosRepositor
       }
     },
 
-    async atualizarDataRealizacaoExamePorCodigoSequencialResultado(ResultadoExameSoc) {
+    async obterCodAgendamentoCredenciadoBasePorCodSequencialResultadoSoc(codSequencialResultadoSoc) {
+      try {
+        const AgendamentoCredenciadoServicoDb = () => db('AgendamentoCredenciadoServico')
+        const AgendamentoCredenciadoServico = await AgendamentoCredenciadoServicoDb()
+          .select('codAgendamentoCredenciadoServico')
+          .where('codSequencialResultadoSOC', codSequencialResultadoSoc)
+          .first()
+        return AgendamentoCredenciadoServico['codAgendamentoCredenciadoServico']
+      } catch (error) {
+        throw new Error(`Erro ao realizar consulta: ${error.message}`)
+      }
+    },
+
+    async atualizarDataRealizacaoExamePorCodigoSequencialResultado(ResultadoExameSoc, codAgendamentoCredenciadoServico) {
       const query = `UPDATE acs 
       SET acs.datRealizacao = '${ResultadoExameSoc.DATARESULTADO}',
       acs.codUsuarioPreenchimentoRealizacao = 21862,
       acs.datPreenchimentoRealizacao = ${db.fn.now()}
       FROM agendamentoCredenciadoServico acs 
-      WHERE acs.codSequencialResultadoSoc = '${ResultadoExameSoc.SEQUENCIALRESULTADO}'`
+      WHERE acs.codSequencialResultadoSOC = '${ResultadoExameSoc.SEQUENCIALRESULTADO}'
+      and acs.codAgendamentoCredenciadoServico = ${codAgendamentoCredenciadoServico}`
       console.log(query)
       await db.raw('select 1')
+      return codAgendamentoCredenciadoServico
     },
   }
 }

@@ -1,10 +1,10 @@
-import { consumirDataDeRealizacao } from '@/domain/controllers/consome-data-realizacao'
+import { consumirDataRealizacaoAgendamentosPendentes } from '@/domain/controllers/agendamento/data-realizacao.controller'
 import { db } from '@/infra/database'
 import { criarAgendamentosRepository } from '@/infra/repositories/agendamentos-repository'
 
 const criarApp = () => {
   return {
-    consumirDatasDeRealizacaoSoc: consumirDataDeRealizacao,
+    consumirDatasDeRealizacaoSoc: consumirDataRealizacaoAgendamentosPendentes,
     buscarAgendamentosPendentes: criarAgendamentosRepository({ db }).obterAgendamentosPendentes,
   }
 }

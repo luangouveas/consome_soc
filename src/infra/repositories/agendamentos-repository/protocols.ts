@@ -10,5 +10,9 @@ export type AgendamentoPendente = {
 
 export interface AgendamentosRepository {
   obterAgendamentosPendentes: (codEmpresa?: number) => Promise<AgendamentoPendente[]>
-  atualizarDataRealizacaoExamePorCodigoSequencialResultado: (ResultadoExameSoc: ExamesPedidoExame) => Promise<void>
+  obterCodAgendamentoCredenciadoBasePorCodSequencialResultadoSoc: (codSequencialResultadoSoc: string) => Promise<number>
+  atualizarDataRealizacaoExamePorCodigoSequencialResultado: (
+    ResultadoExameSoc: ExamesPedidoExame,
+    codAgendamentoCredenciadoServico: number,
+  ) => Promise<number>
 }
