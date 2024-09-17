@@ -1,7 +1,15 @@
 import * as soap from 'soap'
 
+type retornoSoapSoc = {
+  return: {
+    erro: any
+    mensagemErro: string | undefined
+    retorno: string
+  }
+}
+
 export type CriarSoapClientType = () => {
-  executarSoap: (wsdl: string, method: string, xml: string) => Promise<any>
+  executarSoap: (wsdl: string, method: string, xml: string) => Promise<retornoSoapSoc>
 }
 
 export const criarSoapClient: CriarSoapClientType = () => {
